@@ -1,5 +1,5 @@
 {
-    "name": "Author.PackageName.Runtime",
+    "name": "Philira.TextureChannelPacker.Runtime",
     "references": [],
     "includePlatforms": [
         "Android",
