@@ -9,13 +9,19 @@ public class SmartTextureImporter : ScriptedImporter
 {
     public const string k_SmartTextureExtesion = "smartex";
     public const int k_SmartTextureVersion = 1;
-    
-    [SerializeField] Texture2D m_RedChannel = null;
-    [SerializeField] Texture2D m_GreenChannel = null;
-    [SerializeField] Texture2D m_BlueChannel = null;
-    [SerializeField] Texture2D m_AlphaChannel = null;
 
-    [SerializeField] Vector4 m_InvertColor = new Vector4(0.0f, 0.0f, 0.0f, 0.0f);
+    // Input Texture Settings
+    [SerializeField] Texture2D[] m_InputTextures = new Texture2D[4];
+    [SerializeField] TexturePackingSettings[] m_InputTextureSettings = new TexturePackingSettings[4];
+    
+    // Output Texture Settings
+    [SerializeField] bool m_IsReadable = false;
+    [SerializeField] bool m_sRGBTexture = false;
+    [SerializeField] bool m_EnableMipMap = true;
+
+    [SerializeField] FilterMode m_FilterMode = FilterMode.Bilinear;
+    [SerializeField] TextureWrapMode m_WrapMode = TextureWrapMode.Repeat;
+    [SerializeField] int m_AnisotricLevel = 1;
 
     [MenuItem("Assets/Create/Smart Texture", priority = 310)]
     static void CreateTexture2DArrayMenuItem()
@@ -46,19 +52,23 @@ public class SmartTextureImporter : ScriptedImporter
     
     public override void OnImportAsset(AssetImportContext ctx)
     {
-        PackSettings packSettings;
-        packSettings.invertColor = Vector4.zero;
-        packSettings.generateOnGPU = true;
-
         int width = 512;
         int height = 512;
-        Texture2D[] textures = {m_RedChannel, m_GreenChannel, m_BlueChannel, m_AlphaChannel};
+        Texture2D[] textures = m_InputTextures;
+        TexturePackingSettings[] settings = m_InputTextureSettings;
         bool canGenerateTexture = GetOuputTextureSize(textures, out width, out height);
 
-        Texture2D mask = new Texture2D(width, height, TextureFormat.ARGB32, false);
+        Texture2D mask = new Texture2D(width, height, TextureFormat.ARGB32,  m_EnableMipMap);
+        mask.filterMode = m_FilterMode;
+        mask.wrapMode = m_WrapMode;
+        mask.anisoLevel = m_AnisotricLevel;
+        // TODO:
+        // read/write
+        // color space
+        
         if (canGenerateTexture)
         {
-            mask.PackChannels(textures[0], textures[1], textures[2], textures[3], packSettings);
+            mask.PackChannels(textures, settings);
             
             // Mark all input textures as dependency to the texture array.
             // This causes the texture array to get re-generated when any input texture changes or when the build target changed.

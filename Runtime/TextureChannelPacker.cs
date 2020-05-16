@@ -6,20 +6,16 @@ using UnityEngine.Rendering;
 // TODO: Texture compression / Format
 // TODO: Mipmaps
 
+[System.Serializable]
 /// <summary>
 /// Containts settings that apply color modifiers to each channel.
 /// </summary>
-public struct PackSettings
+public struct TexturePackingSettings
 {
     /// <summary>
     /// Outputs the inverted color (1.0 - color)
     /// </summary>
-    public Vector4 invertColor;
-
-    /// <summary>
-    /// Pack textures on GPU. This doesn't require texture to enable read/write.
-    /// </summary>
-    public bool generateOnGPU;
+    public bool invertColor;
 }
 
 public static class TextureExtension
@@ -43,10 +39,22 @@ public static class TextureExtension
         }
     }
 
-    public static void PackChannels(this Texture2D mask, Texture2D red, Texture2D green, Texture2D blue,
-        Texture2D alpha, in PackSettings packSettings)
+    public static void PackChannels(this Texture2D mask, Texture2D[] textures, TexturePackingSettings[] settings = null, bool generateOnGPU = true)
     {
-        Texture2D[] textures = {red, green, blue, alpha};
+        if (textures == null || textures.Length != 4)
+        {
+            Debug.LogError("Invalid parameter to PackChannels. An array of 4 textures is expected");
+        }
+
+        if (settings == null)
+        {
+            settings = new TexturePackingSettings[4];
+            for (int i = 0; i < settings.Length; ++i)
+            {
+                settings[i].invertColor = false;
+            }
+        }
+        
         int width = mask.width;
         int height = mask.height;
         int pixelCount = width * height;
@@ -55,7 +63,7 @@ public static class TextureExtension
         {
             if (t != null)
             {
-                if (!packSettings.generateOnGPU && !t.isReadable)
+                if (!generateOnGPU && !t.isReadable)
                 {
                     Debug.LogError(t + " texture is not readable. Toogle Read/Write Enable in texture importer. ");
                     return;
@@ -69,13 +77,20 @@ public static class TextureExtension
             }
         }
 
-        if (packSettings.generateOnGPU)
+        if (generateOnGPU)
         {
-            packChannelMaterial.SetTexture("_RedChannel", red != null ? red : Texture2D.blackTexture);
-            packChannelMaterial.SetTexture("_GreenChannel", green != null ? green : Texture2D.blackTexture);
-            packChannelMaterial.SetTexture("_BlueChannel", blue != null ? blue : Texture2D.blackTexture);
-            packChannelMaterial.SetTexture("_AlphaChannel", alpha ?? Texture2D.blackTexture);
-            packChannelMaterial.SetVector("_InvertColor", packSettings.invertColor);
+            float[] invertColor =
+            {
+                settings[0].invertColor ? 1.0f : 0.0f,
+                settings[1].invertColor ? 1.0f : 0.0f,
+                settings[2].invertColor ? 1.0f : 0.0f,
+                settings[3].invertColor ? 1.0f : 0.0f,
+            };
+            packChannelMaterial.SetTexture("_RedChannel", textures[0] != null ? textures[0] : Texture2D.blackTexture);
+            packChannelMaterial.SetTexture("_GreenChannel", textures[1] != null ? textures[1] : Texture2D.blackTexture);
+            packChannelMaterial.SetTexture("_BlueChannel", textures[2] != null ? textures[2] : Texture2D.blackTexture);
+            packChannelMaterial.SetTexture("_AlphaChannel", textures[3] != null ? textures[3] : Texture2D.blackTexture);
+            packChannelMaterial.SetVector("_InvertColor", new Vector4(invertColor[0], invertColor[1], invertColor[2], invertColor[3]));
 
             var rt = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32,
                 RenderTextureReadWrite.Linear);
@@ -94,33 +109,32 @@ public static class TextureExtension
         }
         else
         {
-            var redPixels = textures[0] != null ? textures[0].GetPixels(0) : null;
-            var greenPixels = textures[1] != null ? textures[1].GetPixels(0) : null;
-            var bluePixels = textures[2] != null ? textures[2].GetPixels(0) : null;
-            var alphaPixels = textures[3] != null ? textures[3].GetPixels(0) : null;
-
-            bool invertR = (packSettings.invertColor.x > 0.0f);
-            bool invertG = (packSettings.invertColor.y > 0.0f);
-            bool invertB = (packSettings.invertColor.z > 0.0f);
-            bool invertA = (packSettings.invertColor.w > 0.0f);
+            Color[][] pixels = 
+            {
+                textures[0] != null ? textures[0].GetPixels(0) : null,
+                textures[1] != null ? textures[1].GetPixels(0) : null,
+                textures[2] != null ? textures[2].GetPixels(0) : null,
+                textures[3] != null ? textures[3].GetPixels(0) : null,
+            };
+            
             Color[] maskPixels = new Color[pixelCount];
             for (int i = 0; i < pixelCount; ++i)
             {
-                float r = (redPixels != null) ? redPixels[i].r : 0.0f;
-                float g = (greenPixels != null) ? greenPixels[i].r : 0.0f;
-                float b = (bluePixels != null) ? bluePixels[i].r : 0.0f;
-                float a = (alphaPixels != null) ? alphaPixels[i].r : 0.0f;
+                float r = (textures[0] != null) ? pixels[0][i].r : 0.0f;
+                float g = (textures[1] != null) ? pixels[1][i].r : 0.0f;
+                float b = (textures[2] != null) ? pixels[2][i].r : 0.0f;
+                float a = (textures[3] != null) ? pixels[3][i].r : 0.0f;
 
-                if (invertR)
+                if (settings[0].invertColor)
                     r = 1.0f - r;
 
-                if (invertG)
+                if (settings[1].invertColor)
                     g = 1.0f - g;
 
-                if (invertB)
+                if (settings[2].invertColor)
                     b = 1.0f - b;
 
-                if (invertA)
+                if (settings[3].invertColor)
                     a = 1.0f - a;
 
                 maskPixels[i] = new Color(r, g, b, a);
