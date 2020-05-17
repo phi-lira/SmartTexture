@@ -15,15 +15,15 @@ public class SmartTextureImporter : ScriptedImporter
     [SerializeField] TexturePackingSettings[] m_InputTextureSettings = new TexturePackingSettings[4];
     
     // Output Texture Settings
-    [SerializeField] bool m_IsReadable = false;
-    [SerializeField] bool m_sRGBTexture = false;
+    //[SerializeField] bool m_IsReadable = false;
+    //[SerializeField] bool m_sRGBTexture = false;
     [SerializeField] bool m_EnableMipMap = true;
 
     [SerializeField] FilterMode m_FilterMode = FilterMode.Bilinear;
     [SerializeField] TextureWrapMode m_WrapMode = TextureWrapMode.Repeat;
     [SerializeField] int m_AnisotricLevel = 1;
 
-    [SerializeField] TextureImporterPlatformSettings m_TexturePlatformSettings;
+    [SerializeField] TextureImporterPlatformSettings m_TexturePlatformSettings = null;
 
     [MenuItem("Assets/Create/Smart Texture", priority = k_MenuPriority)]
     static void CreateSmartTextureMenuItem()
