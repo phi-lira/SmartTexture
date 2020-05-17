@@ -6,6 +6,15 @@ Dependency tracking is handled by SmartTexture, that means you can change input 
 
 <img width="347" alt="inspector" src="https://user-images.githubusercontent.com/7453395/82161433-dbe8ab00-989c-11ea-9003-10e8ca867bfe.png">
 
+---
+**NOTE**
+
+This package is still a Proof of Concept (POC) and it's still experimental.
+You can request features or submit bugs by creating new issues in the issue tab. For feature request please add "enhancement" label.
+
+---
+
+
 ## Installation
 SmartTexture is a unity package and you can install it from Package Manager.
 
