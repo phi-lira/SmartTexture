@@ -10,19 +10,20 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
     {
         public static readonly GUIContent[] labelChannels =
         {
-            EditorGUIUtility.TrTextContent("Red Channel"),
-            EditorGUIUtility.TrTextContent("Green Channel"),
-            EditorGUIUtility.TrTextContent("Blue Channel"),
-            EditorGUIUtility.TrTextContent("Blue Channel"),
+            EditorGUIUtility.TrTextContent("Red Channel", "This texture source channel will be packed into the Output texture red channel"),
+            EditorGUIUtility.TrTextContent("Green Channel", "This texture source channel will be packed into the Output texture green channel"),
+            EditorGUIUtility.TrTextContent("Blue Channel", "This texture source channel will be packed into the Output texture blue channel"),
+            EditorGUIUtility.TrTextContent("Alpha Channel", "This texture source channel will be packed into the Output texture alpha channel"),
         };
-        
+
+        public static readonly GUIContent invertColor = EditorGUIUtility.TrTextContent("Invert Color", "If enabled outputs the inverted color (1.0 - color)");
         public static readonly GUIContent readWrite = EditorGUIUtility.TrTextContent("Read/Write Enabled", "Enable to be able to access the raw pixel data from code.");
         public static readonly GUIContent generateMipMaps = EditorGUIUtility.TrTextContent("Generate Mip Maps");
         public static readonly GUIContent sRGBTexture = EditorGUIUtility.TrTextContent("sRGB (Color Texture)", "Texture content is stored in gamma space. Non-HDR color textures should enable this flag (except if used for IMGUI).");
 
         public static readonly GUIContent textureFilterMode = EditorGUIUtility.TrTextContent("Filter Mode");
         public static readonly GUIContent textureWrapMode = EditorGUIUtility.TrTextContent("Wrap Mode");
-        public static readonly GUIContent textureAnisotropicLevel = EditorGUIUtility.TrTextContent("Aniso Level");
+        public static readonly GUIContent textureAnisotropicLevel = EditorGUIUtility.TrTextContent("Anisotropic Level");
 
         public static readonly GUIContent crunchCompression = EditorGUIUtility.TrTextContent("Use Crunch Compression");
 
@@ -66,7 +67,7 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
         m_ShowAdvanced = EditorPrefs.GetBool(k_AdvancedTextureSettingName, m_ShowAdvanced);
         
         EditorGUILayout.Space();
-        EditorGUILayout.LabelField("Input Masks", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Input Textures", EditorStyles.boldLabel);
         EditorGUI.indentLevel++;
 
         DrawInputTexture(0);
@@ -107,10 +108,11 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
         if (index < 0 || index >= 4)
             return;
 
-        EditorGUILayout.BeginHorizontal();
         EditorGUILayout.PropertyField(m_InputTextures[index], Styles.labelChannels[index]);
-        EditorGUILayout.PropertyField(m_InputTextureSettings[index]);
-        EditorGUILayout.EndHorizontal();
+
+        SerializedProperty invertColor = m_InputTextureSettings[index].FindPropertyRelative("invertColor");
+        invertColor.boolValue = EditorGUILayout.Toggle(Styles.invertColor, invertColor.boolValue);
+        EditorGUILayout.Space();
     }
 
     void DrawTextureImporterSettings()

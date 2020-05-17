@@ -8,6 +8,7 @@ public class SmartTextureImporter : ScriptedImporter
 {
     public const string k_SmartTextureExtesion = "smartex";
     public const int k_SmartTextureVersion = 1;
+    public const int k_MenuPriority = 320;
 
     // Input Texture Settings
     [SerializeField] Texture2D[] m_InputTextures = new Texture2D[4];
@@ -24,7 +25,7 @@ public class SmartTextureImporter : ScriptedImporter
 
     [SerializeField] TextureImporterPlatformSettings m_TexturePlatformSettings;
 
-    [MenuItem("Assets/Create/Smart Texture", priority = 310)]
+    [MenuItem("Assets/Create/Smart Texture", priority = k_MenuPriority)]
     static void CreateSmartTextureMenuItem()
     {
         // https://forum.unity.com/threads/how-to-implement-create-new-asset.759662/
