@@ -1,5 +1,5 @@
 {
-    "name": "Philira.TextureChannelPacker.Runtime",
+    "name": "Philira.SmartTexture.Runtime",
     "references": [],
     "includePlatforms": [
         "Android",

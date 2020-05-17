@@ -1,9 +1,9 @@
 {
-    "name": "com.phi-lira.texturechannelpacker",
-    "description": "Texture Channel Packer Tool",
+    "name": "com.phi-lira.smarttexture",
+    "description": "Allows to create smart texture assets for Unity.",
     "version": "0.1.0",
     "unity": "2019.3",
-    "displayName": "Texture Channel Packer",
+    "displayName": "Smart Texture",
     "dependencies": {
     }
 }
