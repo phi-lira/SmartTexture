@@ -1,12 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Security.Policy;
+﻿using System;
 using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
 
 [CustomEditor(typeof(SmartTextureImporter), true)]
-[CanEditMultipleObjects]
 public class SmartTextureImporterEditor : ScriptedImporterEditor
 {
     internal static class Styles
@@ -25,7 +22,17 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
 
         public static readonly GUIContent textureFilterMode = EditorGUIUtility.TrTextContent("Filter Mode");
         public static readonly GUIContent textureWrapMode = EditorGUIUtility.TrTextContent("Wrap Mode");
-        public static readonly GUIContent textureAnisotropicLevel = EditorGUIUtility.TrTextContent("Anisotropic Level");
+        public static readonly GUIContent textureAnisotropicLevel = EditorGUIUtility.TrTextContent("Aniso Level");
+
+        public static readonly GUIContent crunchCompression = EditorGUIUtility.TrTextContent("Use Crunch Compression");
+
+        public static readonly string[] textureSizeOptions =
+        {
+            "32", "64", "128", "256", "512", "1024", "2048", "4096", "8192",
+        };
+
+        public static readonly string[] textureCompressionOptions = Enum.GetNames(typeof(TextureImporterCompression));
+        public static readonly string[] resizeAlgorithmOptions = Enum.GetNames(typeof(TextureResizeAlgorithm));
     }
 
     SerializedProperty[] m_InputTextures = new SerializedProperty[4];
@@ -40,6 +47,8 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
     SerializedProperty m_WrapModeProperty;
     SerializedProperty m_AnisotropiceLevelPropery;
 
+    SerializedProperty m_TexturePlatformSettingsProperty;
+
     bool m_ShowAdvanced = false;
 
     const string k_AdvancedTextureSettingName = "SmartTextureImporterShowAdvanced";
@@ -50,11 +59,6 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
         CacheSerializedProperties();
     }
     
-    Texture2D DrawTexturePreview(string label, Texture2D previewObject)
-    {
-        return (Texture2D)EditorGUILayout.ObjectField(label, previewObject, typeof(Texture2D), false);
-    }
-    
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
@@ -63,7 +67,6 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
         
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Input Masks", EditorStyles.boldLabel);
-        EditorGUILayout.Space();
         EditorGUI.indentLevel++;
 
         DrawInputTexture(0);
@@ -76,23 +79,25 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
         EditorGUILayout.Space();
         
         EditorGUILayout.LabelField("Output Texture", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(m_EnableMipMapProperty, Styles.generateMipMaps);
         EditorGUILayout.Space();
 
-        EditorGUILayout.LabelField("Texture Settings");
         EditorGUILayout.PropertyField(m_FilterModeProperty, Styles.textureFilterMode);
         EditorGUILayout.PropertyField(m_WrapModeProperty, Styles.textureWrapMode);
-        EditorGUILayout.PropertyField(m_AnisotropiceLevelPropery, Styles.textureAnisotropicLevel);
+
+        EditorGUILayout.IntSlider(m_AnisotropiceLevelPropery, 0, 16, Styles.textureAnisotropicLevel);
         EditorGUILayout.Space();
 
-        EditorGUILayout.LabelField("Advanced");
-        
-        // TODO:
+        // TODO: Figure out how to apply TextureImporterSettings on ScriptedImporter
         //EditorGUILayout.PropertyField(m_IsReadableProperty, Styles.readWrite);
         //EditorGUILayout.PropertyField(m_sRGBTextureProperty, Styles.sRGBTexture);
-        EditorGUILayout.PropertyField(m_EnableMipMapProperty, Styles.generateMipMaps);
+        EditorGUILayout.Space();
+        EditorGUILayout.Space();
 
-        EditorGUILayout.Space();
-        EditorGUILayout.Space();
+        // TODO: Figure out how to apply PlatformTextureImporterSettings on ScriptedImporter
+        //DrawTextureImporterSettings();
+        //EditorGUILayout.Space();
+        //EditorGUILayout.Space();
         serializedObject.ApplyModifiedProperties();
         ApplyRevertGUI();
     }
@@ -107,6 +112,39 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
         EditorGUILayout.PropertyField(m_InputTextureSettings[index]);
         EditorGUILayout.EndHorizontal();
     }
+
+    void DrawTextureImporterSettings()
+    {
+        SerializedProperty maxTextureSize = m_TexturePlatformSettingsProperty.FindPropertyRelative("m_MaxTextureSize");
+        SerializedProperty resizeAlgorithm =
+            m_TexturePlatformSettingsProperty.FindPropertyRelative("m_ResizeAlgorithm");
+        SerializedProperty textureCompression =
+            m_TexturePlatformSettingsProperty.FindPropertyRelative("m_TextureCompression");
+        SerializedProperty textureCompressionCrunched =
+            m_TexturePlatformSettingsProperty.FindPropertyRelative("m_CrunchedCompression");
+
+        EditorGUILayout.LabelField("Texture Platform Settings", EditorStyles.boldLabel);
+        EditorGUI.BeginChangeCheck();
+        int sizeOption = EditorGUILayout.Popup("Texture Size", (int)Mathf.Log(maxTextureSize.intValue, 2) - 5, Styles.textureSizeOptions);
+        if (EditorGUI.EndChangeCheck())
+            maxTextureSize.intValue = 32 << sizeOption;
+        
+        EditorGUI.BeginChangeCheck();
+        int resizeOption = EditorGUILayout.Popup("Resize Algorithm", resizeAlgorithm.intValue, Styles.resizeAlgorithmOptions);
+        if (EditorGUI.EndChangeCheck())
+            resizeAlgorithm.intValue = resizeOption; 
+
+        EditorGUI.BeginChangeCheck();
+        int compressionOption = EditorGUILayout.Popup("Compression", textureCompression.intValue, Styles.textureCompressionOptions);
+        if (EditorGUI.EndChangeCheck())
+            textureCompression.intValue = compressionOption;
+
+        EditorGUI.BeginChangeCheck();
+        bool crunchOption = EditorGUILayout.Toggle(Styles.crunchCompression, textureCompressionCrunched.boolValue);
+        if (EditorGUI.EndChangeCheck())
+            textureCompressionCrunched.boolValue = crunchOption;
+    }
+    
     void CacheSerializedProperties()
     {
         SerializedProperty texturesProperty = serializedObject.FindProperty("m_InputTextures");
@@ -124,5 +162,7 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
         m_FilterModeProperty = serializedObject.FindProperty("m_FilterMode");
         m_WrapModeProperty = serializedObject.FindProperty("m_WrapMode");
         m_AnisotropiceLevelPropery = serializedObject.FindProperty("m_AnisotricLevel");
+
+        m_TexturePlatformSettingsProperty = serializedObject.FindProperty("m_TexturePlatformSettings");
     }
 }

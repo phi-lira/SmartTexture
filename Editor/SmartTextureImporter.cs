@@ -2,7 +2,6 @@
 using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 
 [ScriptedImporter(k_SmartTextureVersion, k_SmartTextureExtesion)]
 public class SmartTextureImporter : ScriptedImporter
@@ -23,8 +22,10 @@ public class SmartTextureImporter : ScriptedImporter
     [SerializeField] TextureWrapMode m_WrapMode = TextureWrapMode.Repeat;
     [SerializeField] int m_AnisotricLevel = 1;
 
+    [SerializeField] TextureImporterPlatformSettings m_TexturePlatformSettings;
+
     [MenuItem("Assets/Create/Smart Texture", priority = 310)]
-    static void CreateTexture2DArrayMenuItem()
+    static void CreateSmartTextureMenuItem()
     {
         // https://forum.unity.com/threads/how-to-implement-create-new-asset.759662/
         string directoryPath = "Assets";
@@ -58,17 +59,18 @@ public class SmartTextureImporter : ScriptedImporter
         TexturePackingSettings[] settings = m_InputTextureSettings;
         bool canGenerateTexture = GetOuputTextureSize(textures, out width, out height);
 
-        Texture2D mask = new Texture2D(width, height, TextureFormat.ARGB32,  m_EnableMipMap);
-        mask.filterMode = m_FilterMode;
-        mask.wrapMode = m_WrapMode;
-        mask.anisoLevel = m_AnisotricLevel;
+        Texture2D texture = new Texture2D(width, height, TextureFormat.ARGB32,  m_EnableMipMap);
+        texture.filterMode = m_FilterMode;
+        texture.wrapMode = m_WrapMode;
+        texture.anisoLevel = m_AnisotricLevel;
+        
         // TODO:
         // read/write
         // color space
-        
+
         if (canGenerateTexture)
         {
-            mask.PackChannels(textures, settings);
+            texture.PackChannels(textures, settings);
             
             // Mark all input textures as dependency to the texture array.
             // This causes the texture array to get re-generated when any input texture changes or when the build target changed.
@@ -80,10 +82,13 @@ public class SmartTextureImporter : ScriptedImporter
                     ctx.DependsOnSourceAsset(path);
                 }
             }
+
+            // TODO: Seems like we need to call TextureImporter.SetPlatformTextureSettings to register/apply platform
+            // settings. However we can't subclass from TextureImporter... Is there other way?
         }
         
-        ctx.AddObjectToAsset("mask", mask);
-        ctx.SetMainObject(mask);
+        ctx.AddObjectToAsset("mask", texture);
+        ctx.SetMainObject(texture);
     }
     
     bool GetOuputTextureSize(Texture2D[] textures, out int width, out int height)
