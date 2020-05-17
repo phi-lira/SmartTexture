@@ -59,7 +59,8 @@ public class SmartTextureImporter : ScriptedImporter
         TexturePackingSettings[] settings = m_InputTextureSettings;
         bool canGenerateTexture = GetOuputTextureSize(textures, out width, out height);
 
-        Texture2D texture = new Texture2D(width, height, TextureFormat.ARGB32,  m_EnableMipMap);
+        bool hasAlpha = textures[3] != null;
+        Texture2D texture = new Texture2D(width, height, (hasAlpha) ? TextureFormat.ARGB32 : TextureFormat.RGB24,  m_EnableMipMap);
         texture.filterMode = m_FilterMode;
         texture.wrapMode = m_WrapMode;
         texture.anisoLevel = m_AnisotricLevel;
@@ -71,7 +72,7 @@ public class SmartTextureImporter : ScriptedImporter
         if (canGenerateTexture)
         {
             texture.PackChannels(textures, settings);
-            
+
             // Mark all input textures as dependency to the texture array.
             // This causes the texture array to get re-generated when any input texture changes or when the build target changed.
             foreach (Texture2D t in textures)
@@ -81,6 +82,12 @@ public class SmartTextureImporter : ScriptedImporter
                     var path = AssetDatabase.GetAssetPath(t);
                     ctx.DependsOnSourceAsset(path);
                 }
+            }
+
+            if (m_TexturePlatformSettings.textureCompression != TextureImporterCompression.Uncompressed)
+            {
+                bool highQuality = m_TexturePlatformSettings.textureCompression == TextureImporterCompression.CompressedHQ;
+                texture.Compress(highQuality);
             }
 
             // TODO: Seems like we need to call TextureImporter.SetPlatformTextureSettings to register/apply platform
