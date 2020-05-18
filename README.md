@@ -19,6 +19,7 @@ You can request features or submit bugs by creating new issues in the issue tab.
 SmartTexture is a unity package and you can install it from Package Manager.
 
 Option 1: [Install package via Github](https://docs.unity3d.com/Manual/upm-ui-giturl.html).
+
 Option 2: Clone or download this Github project and [install it as a local package](https://docs.unity3d.com/Manual/upm-ui-local.html).
 
 ## How to use
@@ -34,3 +35,7 @@ Option 2: Clone or download this Github project and [install it as a local packa
 
 5) Now you can use this texture as any regular 2D texture in your project.
 <img width="524" alt="assign" src="https://user-images.githubusercontent.com/7453395/82161435-de4b0500-989c-11ea-9784-e4a9b9403120.png">
+
+## Acknowledgements
+* Thanks to pschraut for [Texture2DArrayImporter](https://github.com/pschraut/UnityTexture2DArrayImportPipeline) project. I've used that project to learn a few things about ScriptedImporter and reused the code to create asset file. 
+* Thanks to [Aras P.](https://twitter.com/aras_p) for guidance and ideas on how to create this.
