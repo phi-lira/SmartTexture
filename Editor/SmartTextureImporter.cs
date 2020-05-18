@@ -28,7 +28,8 @@ public class SmartTextureImporter : ScriptedImporter
     [MenuItem("Assets/Create/Smart Texture", priority = k_MenuPriority)]
     static void CreateSmartTextureMenuItem()
     {
-        // https://forum.unity.com/threads/how-to-implement-create-new-asset.759662/
+        // Asset creation code from pschraut Texture2DArrayImporter
+        // https://github.com/pschraut/UnityTexture2DArrayImportPipeline/blob/master/Editor/Texture2DArrayImporter.cs#L360-L383
         string directoryPath = "Assets";
         foreach (Object obj in Selection.GetFiltered(typeof(Object), SelectionMode.Assets))
         {
