@@ -24,13 +24,14 @@
 
         Pass
         {
-            Tags { "LightMode"="UniversalForward" }
+            Tags { "LightMode"="Forward" }
 
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
             
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "HLSLSupport.cginc"
+            #include "UnityShaderVariables.cginc"
 
             CBUFFER_START(UnityPerMaterial)
             float4 _RedChannel_TexelSize;
@@ -39,7 +40,8 @@
 
             float4 vert(float4 positionOS : POSITION) : SV_POSITION
             {
-                return TransformObjectToHClip(positionOS.xyz);
+                return mul(UNITY_MATRIX_VP, mul(UNITY_MATRIX_M, float4(positionOS.xyz, 1.0)));
+                //return TransformObjectToHClip(positionOS.xyz);
             }
 
             half4 frag(float4 positionHCS : SV_POSITION) : SV_Target
