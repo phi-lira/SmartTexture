@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 [ScriptedImporter(k_SmartTextureVersion, k_SmartTextureExtesion)]
 public class SmartTextureImporter : ScriptedImporter
@@ -15,15 +16,27 @@ public class SmartTextureImporter : ScriptedImporter
     [SerializeField] TexturePackingSettings[] m_InputTextureSettings = new TexturePackingSettings[4];
     
     // Output Texture Settings
-    //[SerializeField] bool m_IsReadable = false;
-    //[SerializeField] bool m_sRGBTexture = false;
+    [SerializeField] bool m_IsReadable = false;
+    [SerializeField] bool m_sRGBTexture = false;
+    
     [SerializeField] bool m_EnableMipMap = true;
+    [SerializeField] bool m_StreamingMipMaps = false;
+    [SerializeField] int m_StreamingMipMapPriority = 0;
+    
+    // TODO: MipMap Generation, is it possible to configure?
+    //[SerializeField] bool m_BorderMipMaps = false;
+    //[SerializeField] TextureImporterMipFilter m_MipMapFilter = TextureImporterMipFilter.BoxFilter;
+    //[SerializeField] bool m_MipMapsPreserveCoverage = false;
+    //[SerializeField] bool m_FadeoutMipMaps = false;
 
     [SerializeField] FilterMode m_FilterMode = FilterMode.Bilinear;
     [SerializeField] TextureWrapMode m_WrapMode = TextureWrapMode.Repeat;
     [SerializeField] int m_AnisotricLevel = 1;
 
     [SerializeField] TextureImporterPlatformSettings m_TexturePlatformSettings = null;
+
+    [SerializeField] TextureFormat m_TextureFormat = TextureFormat.ARGB32;
+    [SerializeField] bool m_UseExplicitTextureFormat = false;
 
     [MenuItem("Assets/Create/Smart Texture", priority = k_MenuPriority)]
     static void CreateSmartTextureMenuItem()
@@ -55,24 +68,28 @@ public class SmartTextureImporter : ScriptedImporter
     
     public override void OnImportAsset(AssetImportContext ctx)
     {
-        int width = 512;
-        int height = 512;
+        int width = m_TexturePlatformSettings.maxTextureSize;
+        int height = m_TexturePlatformSettings.maxTextureSize;
         Texture2D[] textures = m_InputTextures;
         TexturePackingSettings[] settings = m_InputTextureSettings;
-        bool canGenerateTexture = GetOuputTextureSize(textures, out width, out height);
+        
+        var canGenerateTexture = GetOuputTextureSize(textures, out var inputW, out var inputH);
+        //Mimic default importer. We use max size unless assets are smaller
+        width = width < inputW ? width : inputW;
+        height = height < inputH ? height : inputH;
 
         bool hasAlpha = textures[3] != null;
-        Texture2D texture = new Texture2D(width, height, (hasAlpha) ? TextureFormat.ARGB32 : TextureFormat.RGB24,  m_EnableMipMap);
-        texture.filterMode = m_FilterMode;
-        texture.wrapMode = m_WrapMode;
-        texture.anisoLevel = m_AnisotricLevel;
-        
-        // TODO:
-        // read/write
-        // color space
+        Texture2D texture = new Texture2D(width, height, hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24, m_EnableMipMap, m_sRGBTexture)
+        {
+            filterMode = m_FilterMode,
+            wrapMode = m_WrapMode,
+            anisoLevel = m_AnisotricLevel,
+        };
 
         if (canGenerateTexture)
         {
+            //Only attempt to apply any settings if the inputs exist
+
             texture.PackChannels(textures, settings);
 
             // Mark all input textures as dependency to the texture array.
@@ -86,27 +103,48 @@ public class SmartTextureImporter : ScriptedImporter
                 }
             }
 
-            if (m_TexturePlatformSettings.textureCompression != TextureImporterCompression.Uncompressed)
-            {
-                bool highQuality = m_TexturePlatformSettings.textureCompression == TextureImporterCompression.CompressedHQ;
-                texture.Compress(highQuality);
-            }
-
             // TODO: Seems like we need to call TextureImporter.SetPlatformTextureSettings to register/apply platform
             // settings. However we can't subclass from TextureImporter... Is there other way?
+
+            //Currently just supporting one compression format in liew of TextureImporter.SetPlatformTextureSettings
+            if (m_UseExplicitTextureFormat)
+                EditorUtility.CompressTexture(texture, m_TextureFormat, 100);
+            else if (m_TexturePlatformSettings.textureCompression != TextureImporterCompression.Uncompressed)
+                texture.Compress(m_TexturePlatformSettings.textureCompression == TextureImporterCompression.CompressedHQ);
+
+            ApplyPropertiesViaSerializedObj(texture);
         }
         
-        ctx.AddObjectToAsset("mask", texture);
+		//If we pass the tex to the 3rd arg we can have it show in an Icon as normal, maybe configurable?
+        //ctx.AddObjectToAsset("mask", texture, texture);
+		ctx.AddObjectToAsset("mask", texture);
         ctx.SetMainObject(texture);
     }
-    
+
+    void ApplyPropertiesViaSerializedObj(Texture tex)
+    {
+        var so = new SerializedObject(tex);
+        
+        so.FindProperty("m_IsReadable").boolValue = m_IsReadable;
+        so.FindProperty("m_StreamingMipmaps").boolValue = m_StreamingMipMaps;
+        so.FindProperty("m_StreamingMipmapsPriority").intValue = m_StreamingMipMapPriority;
+        //Set ColorSpace on ctr instead
+        //so.FindProperty("m_ColorSpace").intValue = (int)(m_sRGBTexture ? ColorSpace.Gamma : ColorSpace.Linear);
+
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
     bool GetOuputTextureSize(Texture2D[] textures, out int width, out int height)
     {
         Texture2D masterTexture = null;
         foreach (Texture2D t in textures)
         {
-            if (t != null && t.isReadable)
+            if (t != null)
             {
+                //Previously we only read the first readable asset
+                //but we can get the width&height of unreadable textures.
+                //May need more complex selection as now Red channel dictates minimum size
+                //Should we try and find the smallest?
                 masterTexture = t;
                 break;
             }
