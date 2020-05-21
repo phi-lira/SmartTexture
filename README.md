@@ -1,3 +1,7 @@
+# This fork
+This fork is used for feature impl intended for PRs to the main repo. It also maintains a version of the shader that works on the old Unity Renderer (kitchen-sink, not SRP)
+It is recommended that issues and enhancements are tracked on the [main repo](https://github.com/phi-lira/SmartTexture)
+
 # SmartTexture Asset for Unity
 SmartTexture is a custom asset for Unity that allows you a [channel packing](http://wiki.polycount.com/wiki/ChannelPacking) workflow in the editortextures and use them in the Unity editor for a streamlined workflow.
 SmartTextures work as a regular 2D texture asset and you can assign it to material inspectors.
@@ -9,8 +13,8 @@ Dependency tracking is handled by SmartTexture, that means you can change input 
 ---
 **NOTE**
 
-This package is still a Proof of Concept (POC) and it's still experimental. This fork is used for feature impl intended for PRs to the main repo. It also maintains a version of the shader that works on the old Unity Renderer (kitchen-sink, not SRP)
-You can request features or submit bugs by creating new issues in the issue tab. For feature request please add "enhancement" label. It is recommended to do this on the [main repo](https://github.com/phi-lira/SmartTexture)
+This package is still a Proof of Concept (POC) and it's still experimental. 
+You can request features or submit bugs by creating new issues in the issue tab. For feature request please add "enhancement" label. 
 
 ---
 
