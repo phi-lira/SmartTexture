@@ -33,7 +33,7 @@ public class SmartTextureImporter : ScriptedImporter
     [SerializeField] TextureWrapMode m_WrapMode = TextureWrapMode.Repeat;
     [SerializeField] int m_AnisotricLevel = 1;
 
-    [SerializeField] TextureImporterPlatformSettings m_TexturePlatformSettings = null;
+    [SerializeField] TextureImporterPlatformSettings m_TexturePlatformSettings = new TextureImporterPlatformSettings();
 
     [SerializeField] TextureFormat m_TextureFormat = TextureFormat.ARGB32;
     [SerializeField] bool m_UseExplicitTextureFormat = false;
