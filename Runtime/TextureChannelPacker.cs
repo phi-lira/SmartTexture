@@ -39,6 +39,18 @@ public static class TextureExtension
         }
     }
 
+    static bool CompressedTextureFormat(TextureFormat format)
+    {
+        //There should be a much better way to work this out, this might not even be an exhaustive list :(
+        return format == TextureFormat.BC4
+            || format == TextureFormat.BC5
+            || format == TextureFormat.BC6H
+            || format == TextureFormat.BC7
+            || format == TextureFormat.DXT1
+            || format == TextureFormat.DXT1Crunched
+            || format == TextureFormat.DXT5
+            || format == TextureFormat.DXT5Crunched;
+    }
     public static void PackChannels(this Texture2D mask, Texture2D[] textures, TexturePackingSettings[] settings = null, bool generateOnGPU = true)
     {
         if (textures == null || textures.Length != 4)
@@ -58,24 +70,31 @@ public static class TextureExtension
         int width = mask.width;
         int height = mask.height;
         int pixelCount = width * height;
+        bool invalidTextures = false;
 
-        foreach (Texture2D t in textures)
+        for (int i = 0; i < textures.Length; i++)
         {
+            var t = textures[i];
             if (t != null)
             {
                 if (!generateOnGPU && !t.isReadable)
                 {
-                    Debug.LogError(t + " texture is not readable. Toogle Read/Write Enable in texture importer. ");
-                    return;
+                    Debug.LogError($"SmartTexture Aborting: {t.name} texture is not readable so we cannot import on CPU. Toogle Read/Write Enable in texture importer. ", t);
+                    invalidTextures = true;
                 }
 
                 if (t.width != width || t.height != height)
                 {
-                    Debug.LogError(t + " input textures must have the same size.");
-                    return;
+                    Debug.LogWarning($"SmartTexture: {t.name} does not match expected size. This can cause artfacts as the texture will be sampled onto a different size target, mismatches are not advised", t);
+                }
+
+                if (CompressedTextureFormat(t.format))
+                {
+                    Debug.LogWarning($"SmartTexture: {t.name} is already compressed, channel {i} will be double compressed. Please use an uncompressed format, input texture size isn't relevant to the build", t);
                 }
             }
         }
+        if (invalidTextures) return;
 
         if (generateOnGPU)
         {

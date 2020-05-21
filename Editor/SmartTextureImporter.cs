@@ -114,10 +114,8 @@ public class SmartTextureImporter : ScriptedImporter
 
             ApplyPropertiesViaSerializedObj(texture);
         }
-        
-		//If we pass the tex to the 3rd arg we can have it show in an Icon as normal, maybe configurable?
-        //ctx.AddObjectToAsset("mask", texture, texture);
-		ctx.AddObjectToAsset("mask", texture);
+
+        ctx.AddObjectToAsset("mask", texture, texture);
         ctx.SetMainObject(texture);
     }
 
