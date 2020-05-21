@@ -38,9 +38,6 @@ public class SmartTextureImporter : ScriptedImporter
     [SerializeField] TextureFormat m_TextureFormat = TextureFormat.ARGB32;
     [SerializeField] bool m_UseExplicitTextureFormat = false;
 
-    [SerializeField] TextureFormat m_TextureFormat = TextureFormat.ARGB32;
-    [SerializeField] bool m_UseExplicitTextureFormat = false;
-
     [MenuItem("Assets/Create/Smart Texture", priority = k_MenuPriority)]
     static void CreateSmartTextureMenuItem()
     {
