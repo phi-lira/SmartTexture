@@ -159,7 +159,7 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
                 if (EditorGUI.EndChangeCheck())
                     m_UseExplicitTextureFormat.boolValue = explicitFormat;
 
-                using (new EditorGUI.DisabledScope(!explicitFormat))
+                using (new EditorGUI.DisabledScope(explicitFormat))
                 {
                     GUILayout.BeginHorizontal();
                     EditorGUI.BeginChangeCheck();
@@ -177,7 +177,7 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
                     GUILayout.EndHorizontal();
                 }
 
-                using (new EditorGUI.DisabledScope(explicitFormat))
+                using (new EditorGUI.DisabledScope(!explicitFormat))
                 {
                     EditorGUI.BeginChangeCheck();
                     int format = EditorGUILayout.EnumPopup("Texture Format", (TextureFormat)m_TextureFormat.intValue).GetHashCode();//("Compression", m_TextureFormat.enumValueIndex, Styles.textureFormat);
