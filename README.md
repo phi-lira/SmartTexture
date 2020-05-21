@@ -9,8 +9,8 @@ Dependency tracking is handled by SmartTexture, that means you can change input 
 ---
 **NOTE**
 
-This package is still a Proof of Concept (POC) and it's still experimental.
-You can request features or submit bugs by creating new issues in the issue tab. For feature request please add "enhancement" label.
+This package is still a Proof of Concept (POC) and it's still experimental. This fork is used for feature impl intended for PRs to the main repo. It also maintains a version of the shader that works on the old Unity Renderer (kitchen-sink, not SRP)
+You can request features or submit bugs by creating new issues in the issue tab. For feature request please add "enhancement" label. It is recommended to do this on the [main repo](https://github.com/phi-lira/SmartTexture)
 
 ---
 
