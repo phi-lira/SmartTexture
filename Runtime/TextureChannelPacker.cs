@@ -16,6 +16,11 @@ public struct TexturePackingSettings
     /// Outputs the inverted color (1.0 - color)
     /// </summary>
     public bool invertColor;
+
+/// <summary>
+/// Contains settings which channel to use from the source texture (0 = R, G = 1, B = 2, A = 3)
+/// </summary>
+    public int sourceChannel;
 }
 
 public static class TextureExtension
@@ -52,6 +57,7 @@ public static class TextureExtension
             for (int i = 0; i < settings.Length; ++i)
             {
                 settings[i].invertColor = false;
+                settings[i].sourceChannel = 0;
             }
         }
         
@@ -79,6 +85,13 @@ public static class TextureExtension
 
         if (generateOnGPU)
         {
+            Vector4[] channelSelector = {
+                new Vector4(1f,0f,0f,0f),
+                new Vector4(0f,1f,0f,0f),
+                new Vector4(0f,0f,1f,0f),
+                new Vector4(0f,0f,0f,1f),
+            };
+
             float[] invertColor =
             {
                 settings[0].invertColor ? 1.0f : 0.0f,
@@ -91,6 +104,13 @@ public static class TextureExtension
             packChannelMaterial.SetTexture("_BlueChannel", textures[2] != null ? textures[2] : Texture2D.blackTexture);
             packChannelMaterial.SetTexture("_AlphaChannel", textures[3] != null ? textures[3] : Texture2D.blackTexture);
             packChannelMaterial.SetVector("_InvertColor", new Vector4(invertColor[0], invertColor[1], invertColor[2], invertColor[3]));
+
+            packChannelMaterial.SetVector("_RedSourceChannel", channelSelector[settings[0].sourceChannel]);
+            packChannelMaterial.SetVector("_GreenSourceChannel", channelSelector[settings[1].sourceChannel]);
+            packChannelMaterial.SetVector("_BlueSourceChannel", channelSelector[settings[2].sourceChannel]);
+            packChannelMaterial.SetVector("_AlphaSourceChannel", channelSelector[settings[3].sourceChannel]);
+
+
 
             var rt = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32,
                 RenderTextureReadWrite.Linear);
@@ -120,10 +140,10 @@ public static class TextureExtension
             Color[] maskPixels = new Color[pixelCount];
             for (int i = 0; i < pixelCount; ++i)
             {
-                float r = (textures[0] != null) ? pixels[0][i].r : 0.0f;
-                float g = (textures[1] != null) ? pixels[1][i].r : 0.0f;
-                float b = (textures[2] != null) ? pixels[2][i].r : 0.0f;
-                float a = (textures[3] != null) ? pixels[3][i].r : 0.0f;
+                float r = (textures[0] != null) ? pixels[0][i][settings[0].sourceChannel] : 0.0f;
+                float g = (textures[1] != null) ? pixels[1][i][settings[0].sourceChannel] : 0.0f;
+                float b = (textures[2] != null) ? pixels[2][i][settings[0].sourceChannel] : 0.0f;
+                float a = (textures[3] != null) ? pixels[3][i][settings[0].sourceChannel] : 0.0f;
 
                 if (settings[0].invertColor)
                     r = 1.0f - r;
