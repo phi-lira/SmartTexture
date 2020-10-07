@@ -1,10 +1,9 @@
 ﻿using System;
 using UnityEditor;
-using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
 
 [CustomEditor(typeof(SmartTextureImporter), true)]
-public class SmartTextureImporterEditor : ScriptedImporterEditor
+public class SmartTextureImporterEditor : UnityEditor.AssetImporters.ScriptedImporterEditor
 {
     internal static class Styles
     {
@@ -16,7 +15,16 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
             EditorGUIUtility.TrTextContent("Alpha Channel", "This texture source channel will be packed into the Output texture alpha channel"),
         };
 
+        public static readonly GUIContent[] labelSourceChannels =
+        {
+            EditorGUIUtility.TrTextContent("R", "Use red channel from the source testure."),
+            EditorGUIUtility.TrTextContent("G", "Use green channel from the source testure."),
+            EditorGUIUtility.TrTextContent("B", "Use blue channel from the source testure."),
+            EditorGUIUtility.TrTextContent("A", "Use alpha channel from the source testure."),
+        };
+
         public static readonly GUIContent invertColor = EditorGUIUtility.TrTextContent("Invert Color", "If enabled outputs the inverted color (1.0 - color)");
+        public static readonly GUIContent sourceChannel = EditorGUIUtility.TrTextContent("Source Channel", "Which channel from the source texture to use as input.");
         public static readonly GUIContent readWrite = EditorGUIUtility.TrTextContent("Read/Write Enabled", "Enable to be able to access the raw pixel data from code.");
         public static readonly GUIContent generateMipMaps = EditorGUIUtility.TrTextContent("Generate Mip Maps");
         public static readonly GUIContent streamingMipMaps = EditorGUIUtility.TrTextContent("Streaming Mip Maps");
@@ -42,10 +50,10 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
 
     SerializedProperty[] m_InputTextures = new SerializedProperty[4];
     SerializedProperty[] m_InputTextureSettings = new SerializedProperty[4];
-    
+
     SerializedProperty m_IsReadableProperty;
     SerializedProperty m_sRGBTextureProperty;
-    
+
     SerializedProperty m_EnableMipMapProperty;
     SerializedProperty m_StreamingMipMaps;
     SerializedProperty m_StreamingMipMapPriority;
@@ -62,19 +70,19 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
     bool m_ShowAdvanced = false;
 
     const string k_AdvancedTextureSettingName = "SmartTextureImporterShowAdvanced";
-        
+
     public override void OnEnable()
     {
         base.OnEnable();
         CacheSerializedProperties();
     }
-    
+
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
-        
+
         m_ShowAdvanced = EditorPrefs.GetBool(k_AdvancedTextureSettingName, m_ShowAdvanced);
-        
+
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Input Textures", EditorStyles.boldLabel);
         using (new EditorGUI.IndentLevelScope())
@@ -86,7 +94,7 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
         }
         EditorGUILayout.Space();
         EditorGUILayout.Space();
-        
+
         EditorGUILayout.LabelField("Output Texture", EditorStyles.boldLabel);
         using (new EditorGUI.IndentLevelScope())
         {
@@ -123,8 +131,15 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
 
         EditorGUILayout.PropertyField(m_InputTextures[index], Styles.labelChannels[index]);
 
+        SerializedProperty sourceChannel = m_InputTextureSettings[index].FindPropertyRelative("sourceChannel");
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.PrefixLabel(Styles.sourceChannel);
+        sourceChannel.intValue = GUILayout.Toolbar(sourceChannel.intValue, Styles.labelSourceChannels);
+        EditorGUILayout.EndHorizontal();
+
         SerializedProperty invertColor = m_InputTextureSettings[index].FindPropertyRelative("invertColor");
         invertColor.boolValue = EditorGUILayout.Toggle(Styles.invertColor, invertColor.boolValue);
+
         EditorGUILayout.Space();
     }
 
@@ -187,7 +202,7 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
             }
         }
     }
-    
+
     void CacheSerializedProperties()
     {
         SerializedProperty texturesProperty = serializedObject.FindProperty("m_InputTextures");
@@ -197,10 +212,10 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
             m_InputTextures[i] = texturesProperty.GetArrayElementAtIndex(i);
             m_InputTextureSettings[i] = settingsProperty.GetArrayElementAtIndex(i);
         }
-        
+
         m_IsReadableProperty = serializedObject.FindProperty("m_IsReadable");
         m_sRGBTextureProperty = serializedObject.FindProperty("m_sRGBTexture");
-        
+
         m_EnableMipMapProperty = serializedObject.FindProperty("m_EnableMipMap");
         m_StreamingMipMaps = serializedObject.FindProperty("m_StreamingMipMaps");
         m_StreamingMipMapPriority = serializedObject.FindProperty("m_StreamingMipMapPriority");

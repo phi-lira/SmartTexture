@@ -15,6 +15,11 @@
     Texture2D _BlueChannel;
     Texture2D _AlphaChannel;
     sampler sampler_point_clamp;
+
+    //Returns channel with the highest value
+    half max4(half4 i) {
+        return max(max(max(i.r, i.g), i.b), i.a);
+    }
     
     ENDHLSL
 
@@ -35,6 +40,10 @@
             CBUFFER_START(UnityPerMaterial)
             float4 _RedChannel_TexelSize;
             half4 _InvertColor;
+            half4 _RedSourceChannel;
+            half4 _GreenSourceChannel;
+            half4 _BlueSourceChannel;
+            half4 _AlphaSourceChannel;
             CBUFFER_END
 
             float4 vert(float4 positionOS : POSITION) : SV_POSITION
@@ -45,22 +54,22 @@
             half4 frag(float4 positionHCS : SV_POSITION) : SV_Target
             {
                 float2 uv = positionHCS * _RedChannel_TexelSize.xy;
-                half r = _RedChannel.Sample(sampler_point_clamp, uv).r;
-                half g = _GreenChannel.Sample(sampler_point_clamp, uv).r;
-                half b = _BlueChannel.Sample(sampler_point_clamp, uv).r;
-                half a = _AlphaChannel.Sample(sampler_point_clamp, uv).r;
+                half r = max4(_RedChannel.Sample(sampler_point_clamp, uv).rgba * _RedSourceChannel);
+                half g = max4(_GreenChannel.Sample(sampler_point_clamp, uv).rgba * _GreenSourceChannel);
+                half b = max4(_BlueChannel.Sample(sampler_point_clamp, uv).rgba * _BlueSourceChannel);
+                half a = max4(_AlphaChannel.Sample(sampler_point_clamp, uv).rgba * _AlphaSourceChannel);
                 
                 if (_InvertColor.x > 0.0)
-                    r = 1.0 - r;
+                r = 1.0 - r;
 
                 if (_InvertColor.g > 0.0)
-                    g = 1.0 - g;
+                g = 1.0 - g;
 
                 if (_InvertColor.b > 0.0)
-                    b = 1.0 - b;
+                b = 1.0 - b;
 
                 if (_InvertColor.a > 0.0)
-                    a = 1.0 - a;
+                a = 1.0 - a;
                 return half4(r, g, b, a);
             }
             ENDHLSL
@@ -80,6 +89,10 @@
             CBUFFER_START(UnityPerMaterial)
             float4 _RedChannel_TexelSize;
             half4 _InvertColor;
+            half4 _RedSourceChannel;
+            half4 _GreenSourceChannel;
+            half4 _BlueSourceChannel;
+            half4 _AlphaSourceChannel;
             CBUFFER_END
 
             float4 vert(float4 positionOS : POSITION) : SV_POSITION
@@ -90,22 +103,22 @@
             half4 frag(float4 positionHCS : SV_POSITION) : SV_Target
             {
                 float2 uv = positionHCS * _RedChannel_TexelSize.xy;
-                half r = _RedChannel.Sample(sampler_point_clamp, uv).r;
-                half g = _GreenChannel.Sample(sampler_point_clamp, uv).r;
-                half b = _BlueChannel.Sample(sampler_point_clamp, uv).r;
-                half a = _AlphaChannel.Sample(sampler_point_clamp, uv).r;
+                half r = max4(_RedChannel.Sample(sampler_point_clamp, uv).rgba * _RedSourceChannel);
+                half g = max4(_GreenChannel.Sample(sampler_point_clamp, uv).rgba * _GreenSourceChannel);
+                half b = max4(_BlueChannel.Sample(sampler_point_clamp, uv).rgba * _BlueSourceChannel);
+                half a = max4(_AlphaChannel.Sample(sampler_point_clamp, uv).rgba * _AlphaSourceChannel);
                 
                 if (_InvertColor.x > 0.0)
-                    r = 1.0 - r;
+                r = 1.0 - r;
 
                 if (_InvertColor.g > 0.0)
-                    g = 1.0 - g;
+                g = 1.0 - g;
 
                 if (_InvertColor.b > 0.0)
-                    b = 1.0 - b;
+                b = 1.0 - b;
 
                 if (_InvertColor.a > 0.0)
-                    a = 1.0 - a;
+                a = 1.0 - a;
                 return half4(r, g, b, a);
             }
             ENDHLSL

@@ -1,11 +1,10 @@
 ﻿using System.IO;
 using UnityEditor;
-using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-[ScriptedImporter(k_SmartTextureVersion, k_SmartTextureExtesion)]
-public class SmartTextureImporter : ScriptedImporter
+[UnityEditor.AssetImporters.ScriptedImporter(k_SmartTextureVersion, k_SmartTextureExtesion)]
+public class SmartTextureImporter : UnityEditor.AssetImporters.ScriptedImporter
 {
     public const string k_SmartTextureExtesion = "smartex";
     public const int k_SmartTextureVersion = 1;
@@ -66,7 +65,7 @@ public class SmartTextureImporter : ScriptedImporter
             "Smart Texture Asset for Unity. Allows to channel pack textures by using a ScriptedImporter. Requires Smart Texture Package from https://github.com/phi-lira/SmartTexture. Developed by Felipe Lira.");
     }
     
-    public override void OnImportAsset(AssetImportContext ctx)
+    public override void OnImportAsset(UnityEditor.AssetImporters.AssetImportContext ctx)
     {
         int width = m_TexturePlatformSettings.maxTextureSize;
         int height = m_TexturePlatformSettings.maxTextureSize;
