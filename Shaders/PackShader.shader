@@ -16,6 +16,7 @@
     Texture2D _AlphaChannel;
     sampler sampler_point_clamp;
 
+    //Returns channel with the highest value
     half max4(half4 i) {
         return max(max(max(i.r, i.g), i.b), i.a);
     }

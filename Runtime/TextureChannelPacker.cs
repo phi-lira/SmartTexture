@@ -27,6 +27,13 @@ public static class TextureExtension
 {
     static Material s_PackChannelMaterial = null;
 
+    static readonly Vector4[] channelSelector = {
+        new Vector4(1f,0f,0f,0f),
+        new Vector4(0f,1f,0f,0f),
+        new Vector4(0f,0f,1f,0f),
+        new Vector4(0f,0f,0f,1f)
+    };
+
     private static Material packChannelMaterial
     {
         get
@@ -85,13 +92,6 @@ public static class TextureExtension
 
         if (generateOnGPU)
         {
-            Vector4[] channelSelector = {
-                new Vector4(1f,0f,0f,0f),
-                new Vector4(0f,1f,0f,0f),
-                new Vector4(0f,0f,1f,0f),
-                new Vector4(0f,0f,0f,1f),
-            };
-
             float[] invertColor =
             {
                 settings[0].invertColor ? 1.0f : 0.0f,
@@ -109,7 +109,6 @@ public static class TextureExtension
             packChannelMaterial.SetVector("_GreenSourceChannel", channelSelector[settings[1].sourceChannel]);
             packChannelMaterial.SetVector("_BlueSourceChannel", channelSelector[settings[2].sourceChannel]);
             packChannelMaterial.SetVector("_AlphaSourceChannel", channelSelector[settings[3].sourceChannel]);
-
 
 
             var rt = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32,

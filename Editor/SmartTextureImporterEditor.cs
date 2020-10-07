@@ -16,7 +16,7 @@ public class SmartTextureImporterEditor : UnityEditor.AssetImporters.ScriptedImp
         };
 
         public static readonly GUIContent[] labelSourceChannels =
-{
+        {
             EditorGUIUtility.TrTextContent("R", "Use red channel from the source testure."),
             EditorGUIUtility.TrTextContent("G", "Use green channel from the source testure."),
             EditorGUIUtility.TrTextContent("B", "Use blue channel from the source testure."),
