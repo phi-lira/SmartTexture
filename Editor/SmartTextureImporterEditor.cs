@@ -20,7 +20,6 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
         public static readonly GUIContent sourceChannel = EditorGUIUtility.TrTextContent("Source Channel", "The channel of the texture that should be extracted");
         
         public static readonly GUIContent invertColor = EditorGUIUtility.TrTextContent("Invert Color", "If enabled outputs the inverted color (1.0 - color)");
-        public static readonly GUIContent test = EditorGUIUtility.TrTextContent("Test", "This is a test.");
         
         public static readonly GUIContent readWrite = EditorGUIUtility.TrTextContent("Read/Write Enabled", "Enable to be able to access the raw pixel data from code.");
         public static readonly GUIContent generateMipMaps = EditorGUIUtility.TrTextContent("Generate Mip Maps");
