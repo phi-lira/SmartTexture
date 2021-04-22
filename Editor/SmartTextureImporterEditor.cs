@@ -16,7 +16,12 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
             EditorGUIUtility.TrTextContent("Alpha Channel", "This texture source channel will be packed into the Output texture alpha channel"),
         };
 
+        public static readonly GUIContent sourceTexture = EditorGUIUtility.TrTextContent("Source Texture", "The texture from which the channel will be extracted");
+        public static readonly GUIContent sourceChannel = EditorGUIUtility.TrTextContent("Source Channel", "The channel of the texture that should be extracted");
+        
         public static readonly GUIContent invertColor = EditorGUIUtility.TrTextContent("Invert Color", "If enabled outputs the inverted color (1.0 - color)");
+        public static readonly GUIContent test = EditorGUIUtility.TrTextContent("Test", "This is a test.");
+        
         public static readonly GUIContent readWrite = EditorGUIUtility.TrTextContent("Read/Write Enabled", "Enable to be able to access the raw pixel data from code.");
         public static readonly GUIContent generateMipMaps = EditorGUIUtility.TrTextContent("Generate Mip Maps");
         public static readonly GUIContent streamingMipMaps = EditorGUIUtility.TrTextContent("Streaming Mip Maps");
@@ -36,6 +41,7 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
         };
 
         public static readonly string[] textureCompressionOptions = Enum.GetNames(typeof(TextureImporterCompression));
+        public static readonly string[] textureChannels = Enum.GetNames(typeof(TextureChannels));
         public static readonly string[] textureFormat = Enum.GetNames(typeof(TextureFormat));
         public static readonly string[] resizeAlgorithmOptions = Enum.GetNames(typeof(TextureResizeAlgorithm));
     }
@@ -121,11 +127,21 @@ public class SmartTextureImporterEditor : ScriptedImporterEditor
         if (index < 0 || index >= 4)
             return;
 
-        EditorGUILayout.PropertyField(m_InputTextures[index], Styles.labelChannels[index]);
+        EditorGUILayout.LabelField(Styles.labelChannels[index], EditorStyles.boldLabel);
+        using (new EditorGUI.IndentLevelScope())
+        {
+            EditorGUILayout.PropertyField(m_InputTextures[index], Styles.sourceTexture);
+
+            SerializedProperty sourceChannel = m_InputTextureSettings[index].FindPropertyRelative("sourceChannel");
+            sourceChannel.intValue = EditorGUILayout.Popup(Styles.sourceChannel, sourceChannel.intValue, Styles.textureChannels);
 
         SerializedProperty invertColor = m_InputTextureSettings[index].FindPropertyRelative("invertColor");
         invertColor.boolValue = EditorGUILayout.Toggle(Styles.invertColor, invertColor.boolValue);
+
         EditorGUILayout.Space();
+                
+        }
+        
     }
 
     void DrawTextureImporterSettings()

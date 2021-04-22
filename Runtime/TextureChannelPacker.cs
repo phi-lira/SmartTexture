@@ -16,6 +16,11 @@ public struct TexturePackingSettings
     /// Outputs the inverted color (1.0 - color)
     /// </summary>
     public bool invertColor;
+    
+    /// <summary>
+    /// Outputs the inverted color (1.0 - color)
+    /// </summary>
+    public int sourceChannel;
 }
 
 public static class TextureExtension
@@ -86,11 +91,24 @@ public static class TextureExtension
                 settings[2].invertColor ? 1.0f : 0.0f,
                 settings[3].invertColor ? 1.0f : 0.0f,
             };
+
+            int[] channelSource =
+            {
+                settings[0].sourceChannel,
+                settings[1].sourceChannel,
+                settings[2].sourceChannel,
+                settings[3].sourceChannel
+            };
+            
             packChannelMaterial.SetTexture("_RedChannel", textures[0] != null ? textures[0] : Texture2D.blackTexture);
             packChannelMaterial.SetTexture("_GreenChannel", textures[1] != null ? textures[1] : Texture2D.blackTexture);
             packChannelMaterial.SetTexture("_BlueChannel", textures[2] != null ? textures[2] : Texture2D.blackTexture);
             packChannelMaterial.SetTexture("_AlphaChannel", textures[3] != null ? textures[3] : Texture2D.blackTexture);
             packChannelMaterial.SetVector("_InvertColor", new Vector4(invertColor[0], invertColor[1], invertColor[2], invertColor[3]));
+            packChannelMaterial.SetInt("_RedSource", channelSource[0]);
+            packChannelMaterial.SetInt("_GreenSource", channelSource[1]);
+            packChannelMaterial.SetInt("_BlueSource", channelSource[2]);
+            packChannelMaterial.SetInt("_AlphaSource", channelSource[3]);
 
             var rt = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32,
                 RenderTextureReadWrite.Linear);
